@@ -1,0 +1,41 @@
+# ========== Keil MDK 工程相关忽略 ==========
+*.uvgui.*
+*.uvopt
+*.uvprojx.bak
+Listings/
+Objects/
+Debug/
+Release/
+
+# 编译生成文件
+*.axf
+*.hex
+*.bin
+*.elf
+*.map
+*.o
+*.d
+*.crf
+*.lst
+*.htm
+*.sct
+*.dep
+*.lnp
+
+# ========== 系统、编辑器缓存 ==========
+# Windows
+Thumbs.db
+# Mac
+.DS_Store
+# VSCode
+.vscode/
+# IDEA
+.idea/
+# 临时文件
+*.bak
+*.tmp
+*.log
+
+# ========== 其他嵌入式常用忽略（按需）==========
+# STM32CubeMX生成的缓存
+STM32CubeMX/.metadata/

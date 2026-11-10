@@ -1,0 +1,41 @@
+# ========== Keil MDK 构建产物 ==========
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.bin
+*.elf
+*.map
+*.lst
+*.sct
+*.dep
+*.lnp
+*.htm
+*.uvgui.*
+*.uvguix.*
+*.uvprojx.bak
+*.Bak
+*.log
+Objects/
+Listings/
+Debug/
+Release/
+
+# ========== Keil 用户界面状态（每人不同，不入库）==========
+*.uvoptx
+
+# ========== Python ==========
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ========== 系统与编辑器 ==========
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+
+# ========== Keil 调试器配置（含本机路径）==========
+DebugConfig/

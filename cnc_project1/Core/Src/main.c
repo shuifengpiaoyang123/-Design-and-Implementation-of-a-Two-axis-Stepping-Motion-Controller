@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stepper.h"
+#include "protocol.h"
 
 /* USER CODE END Includes */
 
@@ -35,7 +36,12 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+/* ★ 限位保护总开关：光电开关接好、并用万用表确认"未遮挡 = 低电平、遮挡 = 高电平"后
+     改成 1。关着的时候硬限位不报警（调试阶段防止悬空输入误触发），但要验收 F5 必须开 */
+#define LIMITS_ENABLE   0
 
+/* 上电是否自动回零（1 = 开机先回零；0 = 等上位机发 HOME 指令） */
+#define HOME_ON_BOOT    0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -46,8 +52,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t motor_test_start = 0;
-uint8_t motor_test_started = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,37 +98,34 @@ int main(void)
   MX_TIM2_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-/* ??????? */
-Stepper_Init();
+    /* 步进电机模块初始化：轴对象、参数、引脚 */
+    Stepper_Init();
 
-/* ??TIM2 50kHz???? */
-if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK)
-{
-    Error_Handler();
-}
+    /* 启动 TIM2 50 kHz 节拍中断（脉冲发生层） */
+    if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+#if LIMITS_ENABLE
+    Stepper_EnableLimits(1);
+#endif
+
+    /* 协议层：启动串口接收中断、准备状态上报 */
+    Protocol_Init();
+
+#if HOME_ON_BOOT
+    Stepper_HomeStart(STEPPER_X);
+#endif
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      if (motor_test_started == 0)
-      {
-          if (Stepper_Start(STEPPER_X, -1, 20.0f))
-          {
-              motor_test_start = HAL_GetTick();
-              motor_test_started = 1;
-          }
-      }
-
-      if (motor_test_started == 1)
-      {
-          if (HAL_GetTick() - motor_test_start >= 2000)
-          {
-              Stepper_Stop(STEPPER_X);
-              motor_test_started = 2;
-          }
-      }
+      /* 主循环只做一件事：收行 → 分派 → 定时上报
+         串口中断只入队，运动函数在主循环里调用（任务书 4.1：中断里不碰脉冲引脚） */
+      Protocol_Poll();
 
     /* USER CODE BEGIN 3 */
   }
